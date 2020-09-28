@@ -439,18 +439,32 @@ bign bmod(bign a, bign b) {
 	return bsub(a, bmul(b, bdiv(a, b)));
 }
 
+bign bpow(bign a, bign b) {
+	bign one, res;
+	res = badd(a,one);
+	res = bsub(res, one);//=的重载没写
+	one.insert("1");
+	while (tgt(b, one)) {
+		res = bmul(a, res);
+		b = bsub(b, one);
+	}
+	return res;
+}
+
 //////////////////////////////////////////////////////////////
 //主处理函数
 //
 vector<string> Transfer(string& str);
 string Calculate(vector<string> result);
 string sabs(string str) {
+	str = Calculate(Transfer(str));
 	if (str[0] == 45) {
 		str.erase(0, 1);
 	}
 	return str;
 }
 string slog(string str) {
+	str = Calculate(Transfer(str));
 	bign len;
 	len.insert(str);
 	stringstream temp;
@@ -458,6 +472,7 @@ string slog(string str) {
 	return temp.str();
 }
 string sneg(string str) {
+	str = Calculate(Transfer(str));
 	if (str[0] == 45) {
 		str.erase(0, 1);
 		str = "(0+" + str + ')';
@@ -468,6 +483,7 @@ string sneg(string str) {
 	return str;
 }
 string sfact(string str) {
+	str = Calculate(Transfer(str));
 	bign u, tmp,l;
 	tmp.insert(str);
 	l.insert("1"); 
@@ -478,6 +494,7 @@ string sfact(string str) {
 	return tmp.get();
 }
 string ssqrt(string str){
+	str = Calculate(Transfer(str));
 	double A = atof(str.c_str());
 	double x0 = A + 0.25, x1, x2 = x0;
 	while (1) {
@@ -650,6 +667,7 @@ vector<string> Transfer(string& str){
 	map<string, int> precedence;//优先级定义
 	precedence["+"] = precedence["-"] = 0,
 		precedence["*"] = precedence["/"] = precedence["%"] = 1,
+		precedence["^"] = 2,
 		precedence["("] = precedence[")"] = -1;
 	vector<string> result;
 	stack<string> operators;
@@ -740,7 +758,7 @@ string Calculate(vector<string> result){
 					nums.push(bmod(num1, num2).get());
 				}
 				else {
-					//fixme . pow() 
+					nums.push(bpow(num1, num2).get());
 				}
 			}
 		}
@@ -881,8 +899,9 @@ void neg(HWND hWnd) {//正负
 		str_temp = "negative(" + str1 ;
 	}
 	cnt_ld++;
-	str1 = str_formar + str_ld + str_temp + str_rd;
-	ch1 = str1.c_str();
+	str_formar = str_formar + str_ld + str_temp + str_rd;
+	str_temp = "";
+	ch1 = str_formar.c_str();
 	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
 	ch1.ReleaseBuffer();
 	clsStr(hWnd);
@@ -900,8 +919,9 @@ void sqrt(HWND hWnd) {//开根号
 		str_temp = "sqrt(" + str1 ;
 	}
 	cnt_ld++;
-	str1 = str_formar + str_ld + str_temp + str_rd;
-	ch1 = str1.c_str();
+	str_formar = str_formar + str_ld + str_temp + str_rd;
+	str_temp = "";
+	ch1 = str_formar.c_str();
 	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
 	ch1.ReleaseBuffer();
 	clsStr(hWnd);
@@ -919,8 +939,9 @@ void log(HWND hWnd) {//取对数
 		str_temp = "log(" + str1 ;
 	}
 	cnt_ld++;
-	str1 = str_formar + str_ld + str_temp + str_rd;
-	ch1 = str1.c_str();
+	str_formar = str_formar + str_ld + str_temp + str_rd;
+	str_temp = "";
+	ch1 = str_formar.c_str();
 	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
 	ch1.ReleaseBuffer();
 	clsStr(hWnd);
@@ -942,8 +963,9 @@ void mod(HWND hWnd) {//取余
 		else {
 			str_temp = str_formar + str2 + str1 + " % ";
 		}
-		str1 = str_formar + str_ld + str_temp + str_rd;
-		ch1 = str1.c_str();
+		str_formar = str_formar + str_ld + str_temp + str_rd;
+		str_temp = "";
+		ch1 = str_formar.c_str();
 		SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
 		ch1.ReleaseBuffer();
 	}
@@ -962,10 +984,55 @@ void abs(HWND hWnd) {//绝对值
 		str_temp = "abs(" + str1 ;
 	}
 	cnt_ld++;
-	str1 = str_formar + str_ld + str_temp + str_rd;
-	ch1 = str1.c_str();
+	str_formar = str_formar + str_ld + str_temp + str_rd;
+	str_temp = "";
+	ch1 = str_formar.c_str();
 	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
 	ch1.ReleaseBuffer();
+	clsStr(hWnd);
+}
+
+void lev(HWND hWnd) {//阶乘
+	CString ch1;
+	GetDlgItemText(hWnd, IDC_EDIT1, ch1.GetBuffer(MAX_DIGIT), MAX_DIGIT);
+	string str1(CW2A(ch1.GetString()));
+	ch1.ReleaseBuffer();
+	if (str_temp.length() > 1) {
+		str_temp = "fact(" + str_temp;
+	}
+	else {
+		str_temp = "fact(" + str1;
+	}
+	str_formar = str_formar + str_ld + str_temp + str_rd;
+	str_temp = "";
+	ch1 = str_formar.c_str();
+	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
+	ch1.ReleaseBuffer();
+	clsStr(hWnd);
+}
+
+void pow(HWND hWnd) {//次方
+	CString ch1, ch2;
+	GetDlgItemText(hWnd, IDC_EDIT1, ch1.GetBuffer(MAX_DIGIT), MAX_DIGIT);
+	GetDlgItemText(hWnd, IDC_EDIT2, ch2.GetBuffer(MAX_DIGIT), MAX_DIGIT);
+	string str1(CW2A(ch1.GetString()));
+	string str2(CW2A(ch2.GetString()));
+	ch1.ReleaseBuffer();
+	ch2.ReleaseBuffer();
+	clsStr(hWnd);
+	if (str1.length() > 0) {
+		if (str2.length() == 0) {
+			str_temp = str_formar + str1 + " ^ ";
+		}
+		else {
+			str_temp = str_formar + str2 + str1 + " ^ ";
+		}
+		str_formar = str_formar + str_ld + str_temp + str_rd;
+		str_temp = "";
+		ch1 = str_formar.c_str();
+		SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
+		ch1.ReleaseBuffer();
+	}
 	clsStr(hWnd);
 }
 
@@ -995,48 +1062,6 @@ void rd(HWND hWnd) {//右括号
 	ch1 = str1.c_str();
 	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
 	ch1.ReleaseBuffer();
-}
-
-void pow(HWND hWnd) {//次方
-	CString ch1,ch2;
-	GetDlgItemText(hWnd, IDC_EDIT1, ch1.GetBuffer(MAX_DIGIT), MAX_DIGIT);
-	GetDlgItemText(hWnd, IDC_EDIT2, ch2.GetBuffer(MAX_DIGIT), MAX_DIGIT);
-	string str1(CW2A(ch1.GetString()));
-	string str2(CW2A(ch2.GetString()));
-	ch1.ReleaseBuffer();
-	ch2.ReleaseBuffer();
-	clsStr(hWnd);
-	if (str1.length() > 0) {
-		if (str2.length() == 0) {
-			str_temp = str_formar + str1 + " ^ ";
-		}
-		else {
-			str_temp = str_formar + str2 + str1 + " ^ ";
-		}
-		str1 = str_formar + str_ld + str_temp + str_rd;
-		ch1 = str1.c_str();
-		SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
-		ch1.ReleaseBuffer();
-	}
-	clsStr(hWnd);
-}
-
-void lev(HWND hWnd) {//阶乘
-	CString ch1;
-	GetDlgItemText(hWnd, IDC_EDIT1, ch1.GetBuffer(MAX_DIGIT), MAX_DIGIT);
-	string str1(CW2A(ch1.GetString()));
-	ch1.ReleaseBuffer();
-	if (str_temp.length() > 1) {
-		str_temp = "fact(" + str_temp ;
-	}
-	else {
-		str_temp = "fact(" + str1 ;
-	}
-	str1 = str_formar + str_ld + str_temp + str_rd;
-	ch1 = str1.c_str();
-	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
-	ch1.ReleaseBuffer();
-	clsStr(hWnd);
 }
 ///////////////////////////////////////////////////////////////////////
 
