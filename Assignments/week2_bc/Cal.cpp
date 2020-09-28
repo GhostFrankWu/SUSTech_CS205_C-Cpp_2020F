@@ -1,4 +1,4 @@
-﻿// Cal.cpp : 定义应用程序的入口点。
+// Cal.cpp : 定义应用程序的入口点。
 //
 
 #include "framework.h"
@@ -279,7 +279,7 @@ bool teq(bign& b, bign& a) {
 	return (b.data[i] == a.data[i] && i >= 0);
 }
 //////////////////////////////基本比较定义结束
-void Align(bign& b, bign& a) {
+void Align(bign &b, bign &a) {
 	int i, j, Plen;
 	memset(b.data, 0, sizeof(b.data));
 	memset(a.data, 0, sizeof(a.data));
@@ -390,7 +390,7 @@ bign bsub(bign a, bign b) {
 	}
 	return badd(a, b);
 }
-bign bmul(bign &a, bign &b){
+bign bmul(bign a, bign b){
 	bign ret;
 	int i, j;
 	if ((b.sign == 0 && a.sign == 0) || (b.sign == 1 && a.sign == 1)) {
@@ -422,7 +422,7 @@ bign bmul(bign &a, bign &b){
 	return  ret;
 }
 
-bign bdiv(bign &a, bign &b) {//减法的整数除法
+bign bdiv(bign a, bign b) {//减法的整数除法
 	bign result, one;   
 	result.sign = a.sign ^ b.sign;
 	a.sign = b.sign = 0;
@@ -435,9 +435,8 @@ bign bdiv(bign &a, bign &b) {//减法的整数除法
 	return result;
 }
 
-bign bmod(bign &a, bign &b) {
-	bign temp= bdiv(a, b);
-	return bsub(a, bmul(b,temp));
+bign bmod(bign a, bign b) {
+	return bsub(a, bmul(b, bdiv(a, b)));
 }
 
 //////////////////////////////////////////////////////////////
@@ -446,22 +445,27 @@ bign bmod(bign &a, bign &b) {
 vector<string> Transfer(string& str);
 string Calculate(vector<string> result);
 string sabs(string str) {
-	string s = Calculate(Transfer(str));
-	if (s[0] == 45) {
-		s.erase(0, 1);
+	if (str[0] == 45) {
+		str.erase(0, 1);
 	}
-	return s;
+	return str;
+}
+string slog(string str) {
+	bign len;
+	len.insert(str);
+	stringstream temp;
+	temp << len.int_len;
+	return temp.str();
 }
 string sneg(string str) {
-	string s = Calculate(Transfer(str));
-	if (s[0] == 45) {
-		s.erase(0, 1);
-		s = "(0+" + s + ')';
+	if (str[0] == 45) {
+		str.erase(0, 1);
+		str = "(0+" + str + ')';
 	}
 	else {
-		s = "(0-" + s + ")";
+		str = "(0-" + str + ")";
 	}
-	return s;
+	return str;
 }
 string sfact(string str) {
 	bign u, tmp,l;
@@ -473,96 +477,169 @@ string sfact(string str) {
 	}
 	return tmp.get();
 }
-/*
 string ssqrt(string str){
-	double x0 = A + 0.25, x1, xx = x0;
-	while(1){
-
+	double A = atof(str.c_str());
+	double x0 = A + 0.25, x1, x2 = x0;
+	while (1) {
 		x1 = (x0 * x0 + A) / (2 * x0);
-
-		if (fabs(x1 - x0) <= DBL_EPSILON) break;
-
-		if (xx == x1) break;  //to break two value cycle.
-
-		xx = x0;
-
+		if (fabs(x1 - x0) <= 0.00000001 || x2 == x1) break;  //to break two value cycle.
+		x2 = x0;
 		x0 = x1;
-
 	}
-
-	return x1;
-
-}*/
-string ca(string experission) {//fixme多个函数的叠加处理
-	int min=MAX_DIGIT;
-	string::size_type index = experission.find("negative(");
-	if (index != experission.npos) {
-
+	stringstream temp;
+	temp << x1;
+	return temp.str();
+	/*  大数的除法通过取整实现，所以目前不能进行的大数运算
+	bign x0, x1, x2, A, delta,temp,min;
+	A.insert(str);
+	delta.insert("0.25");
+	min.insert("0.001");
+	x0 = badd(A, delta);
+	x2 = badd(A, delta);
+	while(1){
+		x1 = bdiv(badd(bmul(x0,x0) , A), badd(x0, x0)) ;
+		temp = bsub(x1, x0);
+		if (tlt(temp, min)) break;
+		if (teq(x2,x1)) break;  //to break two value cycle.
+		x2 = x0;
+		x0 = x1;
 	}
-	if (index != experission.npos) {//neg()函数预处理
-		int start = index;
-		int i = index + 9;
-		int cnt = 1;
-		string res = "";
-		while (cnt) {
-			if (experission[i] == '(') {//闭合括号
-				cnt++;
-			}
-			else if (experission[i] == ')') {
-				cnt--;
-				if (cnt == 0) {
-					i++;
-					break;
-				}
-			}
-			res += experission[i++];
+	return x1.get();
+	*/
+}
+bool findAcut(string str) {
+	string data[] = { "abs(" , "log(" ,"sqrt(" ,"sqrt(","negative(" ,"fact(" };
+	for (string f : data) {
+		string::size_type index = str.find(f);
+		if (index != str.npos) {
+			return false;
 		}
-		string temp = sneg(res);
-		experission.replace(start , i - start+1, temp);
 	}
-	index = experission.find("abs(");
-	if (index != experission.npos) {//neg()函数预处理
-		int start = index;
-		int i = index + 4;
-		int cnt = 1;
-		string res = "";
-		while (cnt) {
-			if (experission[i] == '(') {//闭合括号
-				cnt++;
-			}
-			else if (experission[i] == ')') {
-				cnt--;
-				if (cnt == 0) {
-					i++;
-					break;
+	return true;
+}
+
+string ca(string experission) {//多个函数的叠加处理
+	while (!findAcut(experission)) {
+		string::size_type index = experission.find("negative(");
+		if (index != experission.npos) {//neg()函数预处理
+			int start = index;
+			int i = index + 9;
+			int cnt = 1;
+			string res = "";
+			while (cnt) {
+				if (experission[i] == '(') {//闭合括号
+					cnt++;
 				}
-			}
-			res += experission[i++];
-		}
-		string temp = sabs(res);
-		experission.replace(start, i - start + 1, temp);
-	}
-	index = experission.find("fact(");
-	if (index != experission.npos) {//neg()函数预处理
-		int start = index;
-		int i = index + 5;
-		int cnt = 1;
-		string res = "";
-		while (cnt) {
-			if (experission[i] == '(') {//闭合括号
-				cnt++;
-			}
-			else if (experission[i] == ')') {
-				cnt--;
-				if (cnt == 0) {
-					i++;
-					break;
+				else if (experission[i] == ')') {
+					cnt--;
+					if (cnt == 0) {
+						i++;
+						break;
+					}
 				}
+				res += experission[i++];
 			}
-			res += experission[i++];
+			if (findAcut(res)) {
+				string temp = sneg(res);
+				experission.replace(start, i - start, temp);
+			}
 		}
-		string temp = sfact(res);
-		experission.replace(start, i - start + 1, temp);
+		index = experission.find("abs(");
+		if (index != experission.npos) {//neg()函数预处理
+			int start = index;
+			int i = index + 4;
+			int cnt = 1;
+			string res = "";
+			while (cnt) {
+				if (experission[i] == '(') {//闭合括号
+					cnt++;
+				}
+				else if (experission[i] == ')') {
+					cnt--;
+					if (cnt == 0) {
+						i++;
+						break;
+					}
+				}
+				res += experission[i++];
+			}
+			if (findAcut(res)) {
+				string temp = sabs(res);
+				experission.replace(start, i - start, temp);
+			}
+		}
+		index = experission.find("fact(");
+		if (index != experission.npos) {//fact()函数预处理
+			int start = index;
+			int i = index + 5;
+			int cnt = 1;
+			string res = "";
+			while (cnt) {
+				if (experission[i] == '(') {//闭合括号
+					cnt++;
+				}
+				else if (experission[i] == ')') {
+					cnt--;
+					if (cnt == 0) {
+						i++;
+						break;
+					}
+				}
+				res += experission[i++];
+			}
+			if (findAcut(res)) {
+				string temp = sfact(res);
+				experission.replace(start, i - start, temp);
+			}
+		}
+		index = experission.find("sqrt(");
+		if (index != experission.npos) {//sqrt()函数预处理
+			int start = index;
+			int i = index + 5;
+			int cnt = 1;
+			string res = "";
+			while (cnt) {
+				if (experission[i] == '(') {//闭合括号
+					cnt++;
+				}
+				else if (experission[i] == ')') {
+					cnt--;
+					if (cnt == 0) {
+						i++;
+						break;
+					}
+				}
+				res += experission[i++];
+			}
+			if (findAcut(res)) {
+				string temp = ssqrt(res);
+				experission.replace(start, i - start, temp);
+			}
+		}
+		index = experission.find("log(");
+		if (index != experission.npos) {//log()函数预处理
+			int start = index;
+			int i = index + 4;
+			int cnt = 1;
+			string res = "";
+			while (cnt) {
+				if (experission[i] == '(') {//闭合括号
+					cnt++;
+				}
+				else if (experission[i] == ')') {
+					cnt--;
+					if (cnt == 0) {
+						i++;
+						break;
+					}
+				}
+				res += experission[i++];
+			}
+			if (findAcut(res)) {
+				string temp = slog(res);
+				experission.replace(start, i - start, temp);
+			}
+		}
 	}
 	return Calculate(Transfer(experission));
 }
@@ -794,15 +871,16 @@ void neg(HWND hWnd) {//正负
 	ch1.ReleaseBuffer();
 	if (str_temp.length() > 1) {
 		if (str_temp.find("negative(") != 0)//负负得正
-			str_temp = "negative(" + str_temp + ")";
+			str_temp = "negative(" + str_temp ;
 		else {
 			str_temp.erase(str_temp.end() - 1);
 			str_temp.erase(0, 9);
 		}
 	}
 	else {
-		str_temp = "negative(" + str1 + ")";
+		str_temp = "negative(" + str1 ;
 	}
+	cnt_ld++;
 	str1 = str_formar + str_ld + str_temp + str_rd;
 	ch1 = str1.c_str();
 	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
@@ -816,11 +894,12 @@ void sqrt(HWND hWnd) {//开根号
 	string str1(CW2A(ch1.GetString()));
 	ch1.ReleaseBuffer();
 	if (str_temp.length() > 1) {
-		str_temp = "sqrt(" + str_temp + ")";
+		str_temp = "sqrt(" + str_temp ;
 	}
 	else {
-		str_temp = "sqrt(" + str1 + ")";
+		str_temp = "sqrt(" + str1 ;
 	}
+	cnt_ld++;
 	str1 = str_formar + str_ld + str_temp + str_rd;
 	ch1 = str1.c_str();
 	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
@@ -834,11 +913,12 @@ void log(HWND hWnd) {//取对数
 	string str1(CW2A(ch1.GetString()));
 	ch1.ReleaseBuffer();
 	if (str_temp.length() > 1) {
-		str_temp = "log(" + str_temp + ")";
+		str_temp = "log(" + str_temp ;
 	}
 	else {
-		str_temp = "log(" + str1 + ")";
+		str_temp = "log(" + str1 ;
 	}
+	cnt_ld++;
 	str1 = str_formar + str_ld + str_temp + str_rd;
 	ch1 = str1.c_str();
 	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
@@ -876,11 +956,12 @@ void abs(HWND hWnd) {//绝对值
 	string str1(CW2A(ch1.GetString()));
 	ch1.ReleaseBuffer();
 	if (str_temp.length() > 1 ) {
-		str_temp = "abs(" + str_temp + ")";
+		str_temp = "abs(" + str_temp ;
 	}
 	else {
-		str_temp = "abs(" + str1 + ")";
+		str_temp = "abs(" + str1 ;
 	}
+	cnt_ld++;
 	str1 = str_formar + str_ld + str_temp + str_rd;
 	ch1 = str1.c_str();
 	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
@@ -946,10 +1027,10 @@ void lev(HWND hWnd) {//阶乘
 	string str1(CW2A(ch1.GetString()));
 	ch1.ReleaseBuffer();
 	if (str_temp.length() > 1) {
-		str_temp = "fact(" + str_temp + ")";
+		str_temp = "fact(" + str_temp ;
 	}
 	else {
-		str_temp = "fact(" + str1 + ")";
+		str_temp = "fact(" + str1 ;
 	}
 	str1 = str_formar + str_ld + str_temp + str_rd;
 	ch1 = str1.c_str();
@@ -959,10 +1040,19 @@ void lev(HWND hWnd) {//阶乘
 }
 ///////////////////////////////////////////////////////////////////////
 
-void ms() {//记忆清空，重置XYZ
+void ms(HWND hWnd) {//记忆清空，重置XYZ
 	FX = "";
 	FY = "";
 	FZ = "";
+	CString ch = "x=";
+	SetDlgItemText(hWnd, IDC_BUTTON_DEFX, ch.GetBuffer(MAX_DIGIT));
+	ch.ReleaseBuffer();
+	ch = "y=";
+	SetDlgItemText(hWnd, IDC_BUTTON_DEFY, ch.GetBuffer(MAX_DIGIT));
+	ch.ReleaseBuffer();
+	ch = "z=";
+	SetDlgItemText(hWnd, IDC_BUTTON_DEFZ, ch.GetBuffer(MAX_DIGIT));
+	ch.ReleaseBuffer();
 }
 void defx(HWND hWnd) {//定义X,Y,Z
 	CString ch1,ch2;
@@ -1143,6 +1233,9 @@ void equ(HWND hWnd) {//等于号
 	}
 	cnt_ld = 0;
 	cnt_rd = 0;
+	ch1 = str.c_str();
+	SetDlgItemText(hWnd, IDC_EDIT2, ch1.GetBuffer(MAX_DIGIT));
+	ch1.ReleaseBuffer();
 	str = ca(str);
 	ch1 = str.c_str();
 	SetDlgItemText(hWnd, IDC_EDIT1, ch1.GetBuffer(MAX_DIGIT));
@@ -1288,7 +1381,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
 			rd(hWnd);
 			break;
 		case IDC_BUTTON_MS:
-			ms();
+			ms(hWnd);
 			break;
 		case IDC_BUTTON_X:
 			getx(hWnd);
