@@ -1,7 +1,10 @@
+
 #include<chrono>
 
-static struct TimePoint{ //时间结构体
+class TimePoint{ //时间结构体
+private:
 	std::chrono::time_point<std::chrono::system_clock> value;
+public:
 	TimePoint() {
 		value = std::chrono::system_clock::now();
 	}
