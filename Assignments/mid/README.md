@@ -6,10 +6,12 @@
 其中数据声明为private，对行列的访问方法返回值为常量不可修改。  
 重载了()和[]操作符，使得可以通过[]以一维矩阵的方法访问数据，(x,y)以二维矩阵的方法访问数据。  
 其它一些初始化方法和打印矩阵的方法  
+![C](https://github.com/GhostFrankWu/SUSTech_CS205_C-Cpp_2020F/blob/master/Assignments/mid/sc/C.png)  
 - 一个自由选择计算方法的矩阵乘法接口  
 传入的参数可以是自定义的矩阵类或者正常的浮点指针，无论传入的是什么，方法会首先校验矩阵的合理性(是否可以相乘)，不合理直接返回，只有可以正常计算的情况下才会进行计算。  
 接口包括正常的暴力（BruteForce）、多线程优化后的暴力（DevideBruteForce）、以及分块后的多线程（DevideBlock）。  
 多线程会根据系统类型及配置分配合适的线程数目(兼容Linux)  
+![CORE](https://github.com/GhostFrankWu/SUSTech_CS205_C-Cpp_2020F/blob/master/Assignments/mid/sc/core.png)  
 - 一个封装的chrono类  
 建立了一个TimePoint计时器类，调用计时，和打印时间只需要简单的“setTime”和“timeDffer”，使得源码更加易读  
 - 程序优化  
