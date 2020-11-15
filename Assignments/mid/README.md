@@ -14,8 +14,11 @@
 建立了一个TimePoint计时器类，调用计时，和打印时间只需要简单的“setTime”和“timeDffer”，使得源码更加易读  
 - 程序优化  
 对于暴力算法，我只测量了1000\*1000矩阵的平均耗时为4.6s，根据算法的复杂度可知在200m数据下暴力方法耗时约为 **4500s** :(10000/1000)^3*4.6≈1小时30分钟  
+![BF](https://github.com/GhostFrankWu/SUSTech_CS205_C-Cpp_2020F/blob/master/Assignments/mid/sc/BF.png)  
 随后我简单地封装了暴力算法划分为多线程运算，并且通过多路循环优化,1000\*1000的矩阵计算用时达到了1s，提升了约四倍的效率。200m数据耗时约为 **1000s**  
+![DBF](https://github.com/GhostFrankWu/SUSTech_CS205_C-Cpp_2020F/blob/master/Assignments/mid/sc/DBF.png)  
 之后通过矩阵分块的方法，并进行release优化得到的结果为148ms,在10000\*10000的数据下运算，实际耗时为 **122s**  ，速度提升了30倍  
+![DB](https://github.com/GhostFrankWu/SUSTech_CS205_C-Cpp_2020F/blob/master/Assignments/mid/sc/DB.png)  
 - 与OpenBLAS的速度比较  
 OpenBLAS启动后占满全部CPU，多线程稳定高效。仅用20s完成了计算  
 单个计算结果OpenBLAS和我的代码没有差异，在向量点乘中我曾发现cblas_sodt存在明显的精度丢失。我通过kahan求和的方法提高了结果的精度。  
