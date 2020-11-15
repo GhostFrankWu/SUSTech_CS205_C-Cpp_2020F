@@ -14,6 +14,7 @@
 ![CORE](https://github.com/GhostFrankWu/SUSTech_CS205_C-Cpp_2020F/blob/master/Assignments/mid/sc/core.png)  
 - 一个封装的chrono类  
 建立了一个TimePoint计时器类，调用计时，和打印时间只需要简单的“setTime”和“timeDffer”，使得源码更加易读  
+![T](https://github.com/GhostFrankWu/SUSTech_CS205_C-Cpp_2020F/blob/master/Assignments/mid/sc/T.png)  
 - 程序优化  
 对于暴力算法，我只测量了1000\*1000矩阵的平均耗时为4.6s，根据算法的复杂度可知在200m数据下暴力方法耗时约为 **4500s** :(10000/1000)^3\*4.6≈1小时30分钟  
 ![BF](https://github.com/GhostFrankWu/SUSTech_CS205_C-Cpp_2020F/blob/master/Assignments/mid/sc/BF.png)  
